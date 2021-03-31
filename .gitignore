@@ -1,3 +1,6 @@
+#Mark uses a mac and it puts .DS_Store places
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
