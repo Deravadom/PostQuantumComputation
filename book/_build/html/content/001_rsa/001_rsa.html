@@ -250,6 +250,20 @@
 <div class="section" id="other-stuff">
 <h2>Other Stuff<a class="headerlink" href="#other-stuff" title="Permalink to this headline">¶</a></h2>
 <p>We can cite sources <a class="bibtex reference internal" href="../999_references.html#fivesort" id="id1">[Dem56]</a>, make things <em>italic</em> or <strong>bold</strong>. We can referecen websites <a class="reference external" href="https://legacy.jupyterbook.org/guide/publish/github-pages.html">A website</a> that tells you how to make this book the webpage in github.</p>
+<p>You can also put in color coded source code either <code class="docutils literal notranslate"><span class="pre">sys.exit(0)</span></code> inline or as a block</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">modpower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">y</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">y</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">modpower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp</span><span class="o">*</span><span class="n">temp</span><span class="p">)</span><span class="o">%</span><span class="n">N</span>
+        <span class="k">return</span> <span class="n">temp</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">modpower</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">temp</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">%</span><span class="n">N</span>
+        <span class="k">return</span> <span class="n">temp</span>
+</pre></div>
+</div>
 </div>
 </div>
 
