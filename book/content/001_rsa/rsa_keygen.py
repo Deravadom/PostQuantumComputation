@@ -67,7 +67,6 @@ def write_key(value, n, fname):
         "w",
     ) as f:
         f.write("{0},{1}".format(value, n))
-        # f.write('{0},{1}'.format(value, n).encode())
 
 
 def keygen(p, q, verify=True):
