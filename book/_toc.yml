@@ -1,7 +1,0 @@
-- file: content/000_intro.md
-- part: RSA Encryption 
-  chapters:
-  - file: content/001_rsa/001_rsa.md
-- part: References
-  chapters:
-  - file: content/999_references.md
