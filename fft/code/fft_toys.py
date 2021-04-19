@@ -9,6 +9,7 @@
 # If I evaluate it at the base, I get my number back
 from math import pow
 
+
 def getCoeff(num, base):
     L = []
     while num > 0:
@@ -23,7 +24,7 @@ def evalPoly(coeff, x):
     res = 0
     for i in range(0, len(coeff)):
         # res = res + coeff[i] * (x ** i)
-        res = res + coeff[i] * (pow(x,i))
+        res = res + coeff[i] * (pow(x, i))
     return res
 
 

@@ -13,8 +13,8 @@ def pad_coeffs(a, b):
     # get  max length
     n = max(len(a), len(b))
     # get the number of bits required to hold the length
-    #bin(n) => '0bxxxx'
-    n = 2*n-1
+    # bin(n) => '0bxxxx'
+    n = 2 * n - 1
     shift = len(bin(n)) - 2
 
     # shift to get the next power of two
@@ -24,8 +24,8 @@ def pad_coeffs(a, b):
     pad_a = next_power - len(a)
     pad_b = next_power - len(b)
 
-    res_a = a + [0]*pad_a
-    res_b = b + [0]*pad_b
+    res_a = a + [0] * pad_a
+    res_b = b + [0] * pad_b
     return res_a, res_b
 
 
@@ -42,8 +42,7 @@ def RFFT(a, exponent=TWO_PI_I):
     if n == 1:
         return a
 
-
-    #split a into even and odd elements
+    # split a into even and odd elements
     a_0 = a[0::2]
     a_1 = a[1::2]
 
@@ -105,7 +104,7 @@ def fft_test(a, b, base=10, verbose=True):
     # multiplied = [x * y for x, y in zip(a_fft, b_fft)]
     multiplied = []
     for i in range(min(len(a_fft_numpy), len(b_fft_numpy))):
-        multiplied.append(a_fft_numpy[i]*b_fft_numpy[i])
+        multiplied.append(a_fft_numpy[i] * b_fft_numpy[i])
 
     if verbose:
         print("Multiplied values:\n", multiplied)
