@@ -5,6 +5,11 @@ import sys
 from numpy.fft import fft, ifft
 
 
+def complex_to_distance(a):
+    b = complex(a)
+    return (b.real ** 2 + b.imag ** 2) ** 0.5
+
+
 def pad_coeffs(a, b):
     """
     Given two coefficient arrays of max length n, the resulting arrays are
