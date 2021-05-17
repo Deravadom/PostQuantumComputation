@@ -1,113 +1,87 @@
-import numpy as np
-from numpy import pi
-from qiskit import QuantumCircuit, transpile, assemble, Aer, IBMQ
-from qiskit.providers.aer import QasmSimulator
-from qiskit.tools.monitor import job_monitor
-from qiskit.visualization import plot_histogram, plot_bloch_multivector
+from qc import *
+from fractions import Fraction
 
 
-def plot_bloch(qc):
-    """Simulates qc and displays the resulting state in bloch spheres"""
-    sv_sim = Aer.get_backend("statevector_simulator")
-    qobj = assemble(qc)
-    statevector = sv_sim.run(qobj).result().get_statevector()
-    plot_bloch_multivector(statevector)
+def c_amod15(a, power):
+    """Controlled multiplication by a mod 15"""
+    if a not in [2, 7, 8, 11, 13]:
+        raise ValueError("'a' must be 2,7,8,11 or 13")
+    U = QuantumCircuit(4)
+    for iteration in range(power):
+        if a in [2, 13]:
+            U.swap(0, 1)
+            U.swap(1, 2)
+            U.swap(2, 3)
+        if a in [7, 8]:
+            U.swap(2, 3)
+            U.swap(1, 2)
+            U.swap(0, 1)
+        if a == 11:
+            U.swap(1, 3)
+            U.swap(0, 2)
+        if a in [7, 11, 13]:
+            for q in range(4):
+                U.x(q)
+    U = U.to_gate()
+    U.name = "%i^%i mod 15" % (a, power)
+    c_U = U.control()
+    return c_U
 
 
-def qft_rotations(circuit, n):
-    """Recursively performs rotations on the circuit"""
-    if n == 0:  # Empty circuit
-        return circuit
-    n -= 1  # Indexes start from 0
-    circuit.h(n)
-    for qubit in range(n):
-        circuit.cp(pi / 2 ** (n - qubit), qubit, n)
+def guess_period(a):
+    n_count = 8
+    qc = QuantumCircuit(n_count + 4, n_count)
 
-    # At the end of the function, recurse for the next qubits
-    qft_rotations(circuit, n)
+    # init counting registers to |+>
+    for q in range(n_count):
+        qc.h(q)
 
+    # init aux register to |1>
+    qc.x(3 + n_count)
 
-def swap_registers(circuit, n):
-    """For a given circuit of even length n, performs swaps of outermost qubits, moving in."""
-    for qubit in range(n // 2):
-        circuit.swap(qubit, n - qubit - 1)
-    return circuit
+    # perform C-Us
+    for q in range(n_count):
+        qc.append(c_amod15(a, 2 ** q), [q] + [i + n_count for i in range(4)])
 
+    # inverse qft
+    qft_dagger(qc, n_count)
 
-def qft(circuit, n):
-    """QFT on the first n qubits in circuit"""
-    qft_rotations(circuit, n)
-    swap_registers(circuit, n)
-    return circuit
+    # measure
+    qc.measure(range(n_count), range(n_count))
 
-
-def inverse_qft(circuit, n):
-    """Does the inverse QFT on the first n qubits in circuit"""
-    # Create QFT circuit
-    qft_circ = qft(QuantumCircuit(n), n)
-    # Inverse it
-    inv_qft_circ = qft_circ.inverse()
-    # Add it to the first n qubits of circuit
-    circuit.append(inv_qft_circ, circuit.qubits[:n])
-    return circuit.decompose()  # decompose() allows us to see the individual gates
+    # get r
+    counts = simulate(qc)
+    phases = [int(output, 2) / (2 ** n_count) for output in counts]
+    guesses = [Fraction(phase).limit_denominator(15).denominator for phase in phases]
+    return guesses
 
 
-def h_all(qc, n):
-    """Applies the H gate to first n qubits in the circuit"""
-    for qubit in range(n):
-        qc.h(qubit)
+def shors15():
+    N = 15
+    # np.random.seed(1)
+    # 1. Pick a random number 1<a<N
+    a = np.random.randint(2, N - 1)
+    print("Trying", a)
+    # 2. Compute gcd(a,N)
+    gcd_aN = np.gcd(a, N)
+    # 3. If gcd(a,N) != 1, return a
+    if not gcd_aN == 1:
+        return a
+    # 4. Else use quantum period finding function, r
+    guesses = guess_period(a)
+    print("Guesses:", guesses)
+    # 4a. Multiple guesses
+    for guess in guesses:
+        # 5. If r is odd, re-run
+        if guess % 2 == 1:
+            continue
+        half_guess = int(guess / 2)
+        # 6. If a^(r/2) is congruent to -1 mod N, re-run
+        if a ** (half_guess) % N == 14:
+            continue
 
-    return qc
+        # 7. Else gcd(a^(r/2)+1, N) and gcd(a^(r/2)-1, N) are nontrivial factors
+        return [np.gcd((a ** half_guess) + 1, N), np.gcd((a ** half_guess) - 1, N)]
 
-
-def simulate(qc, shots=1024):
-    """Simulates the given circuit and returns the counts from the results"""
-    simulator = QasmSimulator()
-    compiled_circuit = transpile(qc, simulator)
-    job = simulator.run(compiled_circuit, shots=2048)
-    result = job.result()
-    counts = result.get_counts(qc)
-    return counts
-
-
-def prepare_circuit(nqubits=3, number=5):
-    """Creates a quantum circuit and encodes the number in phase rotations"""
-    qc = QuantumCircuit(nqubits)
-    qc = h_all(qc, nqubits)
-
-    qc.p(number * pi / 4, 0)
-    qc.p(number * pi / 2, 1)
-    qc.p(number * pi, 2)
-
-    qc = inverse_qft(qc, nqubits)
-    qc.measure_all()
-
-    return qc
-
-
-def qft_dagger(qc, n):
-    """n-qubit QFTdagger the first n qubits in circuit"""
-    for qubit in range(n // 2):
-        qc.swap(qubit, n - qubit - 1)
-    for i in range(n):
-        for j in range(i):
-            qc.cp(-pi / float(2 ** (i - j)), j, i)
-        qc.h(i)
-
-
-def qpe(qc, n, angle):
-    """Applies quantum phase estimation for the given circuit qc of length n at the given angle."""
-    qc = h_all(qc, n)
-    qc.x(n)
-
-    reps = 1
-    for counter in range(n):
-        for i in range(reps):
-            qc.cp(angle, counter, n)
-        reps = reps * 2
-
-    qc = inverse_qft(qc, n)
-    for i in range(n):
-        qc.measure(i, i)
-
-    return qc
+    # If we got here, re-try
+    return shors15()
