@@ -11,3 +11,5 @@ Many cryptographic systems are based on RSA encryption and Prime Number Factoriz
 [#4: QFT and QPE](https://1513041.mediaspace.kaltura.com/media/Post+Quantum+Computation+Video+4A+QFT+and+QPE/1_whix5h1e)
 
 [#5: Shor's Algorithm](https://1513041.mediaspace.kaltura.com/media/Post+Quantum+Computation+Video+5A+Shor%27s+Algorithm/1_p80abs24)
+
+[#6: GGH and Lattice Cryptography](https://1513041.mediaspace.kaltura.com/media/Post+Quantum+Computation+Video+6A+GGH+and+Lattice+Cryptography./1_senm76ah)
